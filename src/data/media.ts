@@ -4,7 +4,8 @@
  *
  * hero-*            hero slide backgrounds
  * thumb-1..3        nav "work" menu thumbnails (landiq, EDW, voxign)
- * clouds            decorative cloud layer
+ * rail-1..3         hero right-rail thumbnails (project screenshots later)
+ * clouds            decorative cloud layer (hero screen-blended banks)
  * landiq-*          LandIQ gallery images + video poster
  * landiq-demo.mp4   LandIQ demo video (intentionally absent for now —
  *                   components must fall back to the poster)
@@ -20,6 +21,9 @@ export const MEDIA = {
   'thumb-1': '/media/thumb-1.svg',
   'thumb-2': '/media/thumb-2.svg',
   'thumb-3': '/media/thumb-3.svg',
+  'rail-1': '/media/rail-1.svg',
+  'rail-2': '/media/rail-2.svg',
+  'rail-3': '/media/rail-3.svg',
   clouds: '/media/clouds.svg',
   'landiq-video-poster': '/media/landiq-video-poster.svg',
   'landiq-demo': '/media/landiq-demo.mp4',

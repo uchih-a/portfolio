@@ -1,11 +1,14 @@
+import Hero from '../components/sections/hero/Hero';
+
 /**
- * Placeholder sections — content lands in later chunks.
- * ids and heights make hash navigation verifiable right now.
+ * Home page: the cinematic hero, then placeholder sections whose
+ * content lands in later chunks. ids and heights make hash
+ * navigation verifiable right now.
  */
 export default function Home() {
   return (
     <>
-      <section id="hero" aria-label="Introduction" className="min-h-screen" />
+      <Hero />
       <section id="projects" aria-label="Selected work" className="min-h-screen border-t border-line" />
       <section id="timeline" aria-label="Timeline" className="min-h-screen border-t border-line" />
       <section id="contact" aria-label="Contact" className="min-h-screen border-t border-line" />
