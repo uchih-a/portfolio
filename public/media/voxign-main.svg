@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="voxign-main placeholder">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1280" y2="720" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0C0C0C"/>
+      <stop offset="1" stop-color="#0F1720"/>
+    </linearGradient>
+    <radialGradient id="a" cx="1050" cy="173" r="72" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7621B0" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#7621B0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <rect width="1280" height="720" fill="url(#a)"/>
+  <text x="640" y="360" font-family="monospace" font-size="29" fill="#D7E2EA" fill-opacity="0.35" text-anchor="middle" dominant-baseline="middle">voxign-main</text>
+</svg>
