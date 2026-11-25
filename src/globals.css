@@ -6,6 +6,27 @@
   color-scheme: dark;
   --ease: cubic-bezier(0.65, 0, 0.35, 1);
   --out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* shared design tokens (mirror tailwind.config.js) */
+  --bg: #0c0c0c;
+  --ink: #d7e2ea;
+  --muted: rgba(215, 226, 234, 0.6);
+  --line: rgba(255, 255, 255, 0.08);
+  --panel: rgba(14, 19, 23, 0.84);
+
+  /* navbar morph engine */
+  --header-h: 72px;
+  --morph: 350ms;
+  --morph-fn: cubic-bezier(0.16, 1, 0.3, 1);
+  --content-in: 320ms;
+  --content-out: 180ms;
+}
+
+/* Navbar breakpoint (shared with useMediaQuery('(max-width: 860px)')) */
+@media (max-width: 860px) {
+  :root {
+    --header-h: 68px;
+  }
 }
 
 html,
@@ -49,8 +70,218 @@ main {
   outline-offset: 3px;
 }
 
+/* Anchor targets never hide behind the fixed header */
+[id] {
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+
+/* ------------------------------------------------------------------
+ * Fixed site header: transparent at the top of the page, frosted
+ * (rgba(12,12,12,.8) + 14px blur + hairline border) once the page is
+ * scrolled past 30% of the viewport. No transform is ever applied to
+ * <nav> or <header>: the morphing dropdown uses them as its
+ * containing block.
+ * ------------------------------------------------------------------ */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color 0.5s var(--ease),
+    border-color 0.5s var(--ease);
+}
+
+.site-header.is-scrolled {
+  background: rgba(12, 12, 12, 0.8);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom-color: var(--line);
+}
+
+/* ------------------------------------------------------------------
+ * Morphing dropdown. The wrapper is placed imperatively (left/top/
+ * width/height) relative to the fixed header. First open and resize
+ * re-place snap (data-snap disables the transition for one frame);
+ * switching between panels animates the box over --morph.
+ * ------------------------------------------------------------------ */
+.dd {
+  position: absolute;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transition:
+    left var(--morph) var(--morph-fn),
+    top var(--morph) var(--morph-fn),
+    width var(--morph) var(--morph-fn),
+    height var(--morph) var(--morph-fn);
+  will-change: left, top, width, height;
+}
+
+.dd[data-snap='true'] {
+  transition: none;
+}
+
+/* Panel contents live in stacked layers; only the active one is
+ * visible. While morphing, the outgoing layer plays a blur-slide out
+ * in the direction the panel is travelling. */
+.dd-layer {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+
+.dd-layer[data-active='true'],
+.dd-layer[data-leaving='true'] {
+  display: block;
+}
+
+.dd-layer[data-active='true'] {
+  animation: dd-in-ltr var(--content-in) var(--out) both;
+}
+
+.dd-layer[data-leaving='true'] {
+  animation: dd-out-ltr var(--content-out) var(--ease) both;
+}
+
+.dd[data-direction='rtl'] .dd-layer[data-active='true'] {
+  animation-name: dd-in-rtl;
+}
+
+.dd[data-direction='rtl'] .dd-layer[data-leaving='true'] {
+  animation-name: dd-out-rtl;
+}
+
+@keyframes dd-in-ltr {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes dd-in-rtl {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes dd-out-ltr {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(24px);
+    filter: blur(8px);
+  }
+}
+
+@keyframes dd-out-rtl {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-24px);
+    filter: blur(8px);
+  }
+}
+
+/* Crossfading thumbnail stack in the work panel */
+.dd-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dd-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+}
+
+.dd-media img[data-active='true'] {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------
+ * Mobile sheet (<= 860px): sits under the header bar, max-height
+ * calc(100svh - 90px), scrolls internally and never bleeds scroll to
+ * the locked body.
+ * ------------------------------------------------------------------ */
+.mobile-sheet {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: calc(var(--header-h) + 8px);
+  max-height: calc(100vh - 90px);
+  max-height: calc(100svh - 90px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  opacity: 0;
+  transform: translateY(-10px);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.25s var(--out),
+    transform 0.25s var(--out),
+    visibility 0s 0.25s;
+}
+
+.mobile-sheet[data-open='true'] {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 0.25s var(--out),
+    transform 0.25s var(--out),
+    visibility 0s;
+}
+
 /* Respect prefers-reduced-motion: no wipes, parallax or auto-advance */
 @media (prefers-reduced-motion: reduce) {
+  :root {
+    --morph: 0.01s;
+    --content-in: 0.01s;
+    --content-out: 0.01s;
+  }
+
   *,
   *::before,
   *::after {

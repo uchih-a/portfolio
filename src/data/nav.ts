@@ -6,7 +6,7 @@ export interface NavLinkItem {
   href: string;
 }
 
-/** Rich entry inside the "work" mega menu (used by later chunks). */
+/** Rich entry inside the "work" mega menu. */
 export interface NavWorkItem {
   id: ProjectId;
   label: string;
@@ -15,7 +15,7 @@ export interface NavWorkItem {
   href: string;
 }
 
-/** Card inside the "services" mega menu (used by later chunks). */
+/** Card inside the "services" mega menu. */
 export interface NavServiceCard {
   id: string;
   label: string;
@@ -23,19 +23,27 @@ export interface NavServiceCard {
   href: string;
 }
 
-export interface NavMenu {
+/** "Work" mega menu: project list with descriptions + thumbnails. */
+export interface NavWorkMenu {
   label: string;
   /** Top-level destination when the menu is not opened. */
   href: string;
-  workItems?: NavWorkItem[];
-  serviceCards?: NavServiceCard[];
+  workItems: NavWorkItem[];
+}
+
+/** "Services" mega menu: two cards. */
+export interface NavServiceMenu {
+  label: string;
+  /** Top-level destination when the menu is not opened. */
+  href: string;
+  serviceCards: NavServiceCard[];
 }
 
 export interface NavData {
   brand: NavLinkItem;
   menus: {
-    work: NavMenu;
-    services: NavMenu;
+    work: NavWorkMenu;
+    services: NavServiceMenu;
   };
   links: NavLinkItem[];
   cta: NavLinkItem;
