@@ -65,7 +65,7 @@ Run them **without** `RESEND_API_KEY` set: valid payloads then exercise the
 ### Environment variables
 
 | Name             | Scope              | Purpose                                                     |
-| ------------------ | ------------------ | ----------------------------------------------------------- |
+| ---------------- | ------------------ | ----------------------------------------------------------- |
 | `RESEND_API_KEY` | Server-only        | Resend API key used by the contact endpoint                 |
 | `CONTACT_TO`     | Server-only        | Destination email for contact-form messages                 |
 | `CONTACT_FROM`   | Server-only        | Verified sender address (defaults to `onboarding@resend.dev`) |
