@@ -122,7 +122,9 @@ export default function Rail({
       >
         <div className="rail-cap-bar" />
         <div className="rail-cap-text">
-          <h3 className="rail-cap-heading">{slide.captionHeading}</h3>
+          {/* A caption label, not a document heading — keeps the page's
+              heading outline h1 -> h2 without a skipped level. */}
+          <p className="rail-cap-heading">{slide.captionHeading}</p>
           <p className="rail-cap-desc">{slide.caption}</p>
         </div>
       </div>

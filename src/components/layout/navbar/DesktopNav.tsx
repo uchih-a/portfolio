@@ -46,6 +46,8 @@ const PANEL_GAP = 10;
  *   re-places the panel;
  * - hover opens for pointerType "mouse" only; click toggles for
  *   touch and keyboard;
+ * - keyboard activation moves focus into the opened panel (disclosure
+ *   pattern), so the next Tab starts on its links;
  * - no transform is ever applied to the <nav> element: the dropdown
  *   uses the fixed <header> as its containing block.
  */
@@ -250,9 +252,23 @@ export default function DesktopNav() {
                   }}
                   aria-expanded={isOpen}
                   aria-controls="nav-dropdown"
-                  onClick={() =>
-                    openIdRef.current === id ? closePanel(false) : openPanel(id)
-                  }
+                  onClick={(event) => {
+                    if (openIdRef.current === id) {
+                      closePanel(false);
+                    } else {
+                      openPanel(id);
+                      if (event.detail === 0) {
+                        // Keyboard activation: move focus into the panel so
+                        // the next Tab starts on its links (event.detail is
+                        // 0 for Enter/Space, >= 1 for pointer clicks).
+                        requestAnimationFrame(() => {
+                          dropdownRef.current
+                            ?.querySelector<HTMLElement>('a[href], button:not([disabled])')
+                            ?.focus();
+                        });
+                      }
+                    }
+                  }}
                   onPointerEnter={(event) => {
                     if (event.pointerType === 'mouse') openPanel(id);
                   }}

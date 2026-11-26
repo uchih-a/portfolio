@@ -14,7 +14,9 @@ const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled])';
  * WORK / SERVICES / PAGES. While the sheet is open it traps focus,
  * locks body scroll, and closes on link click, Escape or an outside
  * pointerdown. The sheet is capped at calc(100svh - 90px) and scrolls
- * internally.
+ * internally. Group labels are paragraphs (not headings) so the sheet,
+ * which lives in the header before main, never breaks the page's
+ * h1 -> h2 outline.
  */
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -150,14 +152,17 @@ export default function MobileNav() {
       >
         <div className="flex flex-col gap-6 px-5 py-6">
           <section aria-labelledby="mobile-work-heading">
-            <h2 id="mobile-work-heading">
+            {/* Group labels are paragraphs, not headings: the sheet lives in
+                the <header> before <main>, so heading elements here would
+                break the page's h1 -> h2 outline. */}
+            <p id="mobile-work-heading">
               <Link
                 to={nav.menus.work.href}
                 className="flex min-h-11 items-center px-1 text-xs font-semibold uppercase tracking-widest text-muted transition-colors duration-200 hover:text-ink"
               >
                 Work
               </Link>
-            </h2>
+            </p>
             <ul className="mt-1 flex flex-col">
               {nav.menus.work.workItems.map((item) => (
                 <li key={item.id}>
@@ -176,14 +181,14 @@ export default function MobileNav() {
           </section>
 
           <section aria-labelledby="mobile-services-heading">
-            <h2 id="mobile-services-heading">
+            <p id="mobile-services-heading">
               <Link
                 to={nav.menus.services.href}
                 className="flex min-h-11 items-center px-1 text-xs font-semibold uppercase tracking-widest text-muted transition-colors duration-200 hover:text-ink"
               >
                 Services
               </Link>
-            </h2>
+            </p>
             <ul className="mt-1 flex flex-col">
               {nav.menus.services.serviceCards.map((card) => (
                 <li key={card.id}>
@@ -202,11 +207,11 @@ export default function MobileNav() {
           </section>
 
           <section aria-labelledby="mobile-pages-heading">
-            <h2 id="mobile-pages-heading">
+            <p id="mobile-pages-heading">
               <span className="flex min-h-11 items-center px-1 text-xs font-semibold uppercase tracking-widest text-muted">
                 Pages
               </span>
-            </h2>
+            </p>
             <ul className="mt-1 flex flex-col">
               {nav.links.map((item) => (
                 <li key={item.href}>
