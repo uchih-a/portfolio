@@ -2,67 +2,152 @@
 
 Personal portfolio for **Alexander Mutsala Nzaywa** — data engineer who builds software, from pipelines to production APIs. Based in Kenya, open to remote.
 
+## Features
+
+- **Pages**: cinematic home (hero slideshow, projects, timeline, contact), `/services`, friendly 404. SPA routing with per-route titles, descriptions and canonical URLs.
+- **Accessibility**: semantic landmarks (header/nav/main/footer), skip-to-content link, one `h1` per page, visible focus ring everywhere, keyboard-operable dropdown + mobile sheet (Escape closes, focus restores/traps correctly, no traps), `aria-expanded`/`aria-controls` on menu triggers, `aria-live` contact status, ≥ 44px touch targets, body-text contrast ≥ 4.5:1.
+- **Reduced motion**: with `prefers-reduced-motion: reduce` there are no wipes, parallax, auto-advance, Ken Burns, pulsing rings or staggered entrances — slides crossfade only when asked, videos show posters, content lands in place.
+- **Performance**: route-level code splitting (`React.lazy` + `Suspense`), framer-motion via `LazyMotion`/`domAnimation` (`m.` components), self-hosted Urbanist variable font with a build-injected `<link rel="preload">`, lazy-loaded below-the-fold images, dimensioned media (no layout shift), `width`/`height` or `aspect-ratio` everywhere.
+- **SEO**: meta description, `theme-color #0C0C0C`, canonical links, Open Graph + Twitter cards (`og:image` = 1200×630 `/media/og.png` placeholder), SVG monogram favicon, `apple-touch-icon.png`, generated `robots.txt` + `sitemap.xml` (from the site URL constant, below).
+- **Contact API**: honeypot + elapsed-time + rate-limit anti-spam, server-side validation, Resend delivery with `reply_to` = sender.
+
 ## Stack
 
 - Vite + React 18 + TypeScript (strict, no `any`)
 - Tailwind CSS 3.4 — dark theme; design tokens live in `tailwind.config.js` and `src/globals.css`
-- framer-motion 12, react-router-dom 6, lucide-react
+- framer-motion 12 (`LazyMotion` + `m`), react-router-dom 6, lucide-react
 - Urbanist Variable, self-hosted via `@fontsource-variable/urbanist` (no external font/script requests)
 - Node 20; deploys to Vercel as a static Vite build plus serverless functions in `/api`
 
 ## Scripts
 
-| Command        | Purpose                                                |
-| -------------- | ------------------------------------------------------ |
-| `npm run dev`  | Local dev server                                        |
-| `npm run lint` | ESLint — must pass before every commit                  |
-| `npm run build`| Type-check (`tsc -b`) then production build to `dist/`  |
-| `npm run preview` | Serve the production build locally (SPA fallback included) |
+| Command             | Purpose                                                            |
+| ------------------- | ------------------------------------------------------------------ |
+| `npm run dev`       | Local dev server                                                    |
+| `npm run dev:api`   | `vercel dev` — serves the SPA + `/api` functions locally            |
+| `npm run lint`      | ESLint — must pass before every commit                              |
+| `npm run build`     | Decode raster assets, type-check (`tsc -b`), build to `dist/`       |
+| `npm run preview`   | Serve the production build locally (SPA fallback included)          |
+| `npm run test:api`  | Curl smoke tests for `/api/contact` (see below)                     |
 
-## Environment variables
+## Contact form + API
 
-Server-side only — never committed, never shipped in client code. See `.env.example` (names only):
+The `<Contact>` section (shared by `/` and `/services`) posts JSON to
+`/api/contact`, a Vercel Node function that sends the message through the
+Resend REST API (no SDK). Behaviour:
 
-| Name             | Purpose                                      |
-| ---------------- | -------------------------------------------- |
-| `RESEND_API_KEY` | Resend API key used by the contact endpoint  |
-| `CONTACT_TO`     | Destination email for contact-form messages |
-| `CONTACT_FROM`   | Verified sender address                      |
+- Only `POST`; anything else gets `405`. Bodies are capped at ~10KB.
+- Anti-spam, in order: a filled honeypot field (`company`) returns a silent
+  `200 {ok:true}` without sending; submissions with `elapsed < 2500ms`
+  since form render get the same silent `200`; an in-memory rate limit
+  allows 5 requests per IP per 10 minutes → `429`.
+- Server-side validation mirrors the client rules (name 2–80, email format,
+  interest from the allowed list, message 10–2000) → `400`.
+- User input is escaped in the HTML body and a plain-text part is included.
+  Subject: `[Portfolio] {interest} - {name}`; `reply_to` = sender email.
+- Missing env vars or a Resend error log server-side (names/status codes
+  only) and return `500 {ok:false,error:"Could not send message"}`. The
+  destination address and env values are never revealed in any response.
 
-The destination email lives only in the server environment.
+### Testing the API
 
-## Media
+Run the curl smoke tests (validation, honeypot, elapsed, rate limit) against
+a local `vercel dev` — or any deployment, using `BASE=https://…`:
 
-All media lives in `public/media/`, and **every** path is registered in exactly one map: `src/data/media.ts` (`MEDIA`). To swap a piece of media:
+```sh
+npm run dev:api                                  # terminal 1
+BASE=http://localhost:3000 npm run test:api     # terminal 2
+```
+
+Run them **without** `RESEND_API_KEY` set: valid payloads then exercise the
+`500 "Could not send message"` path and no email is ever sent.
+
+### Environment variables
+
+| Name             | Scope              | Purpose                                                     |
+| ---------------- | ------------------ | ----------------------------------------------------------- |
+| `RESEND_API_KEY` | Server-only        | Resend API key used by the contact endpoint                 |
+| `CONTACT_TO`     | Server-only        | Destination email for contact-form messages                 |
+| `CONTACT_FROM`   | Server-only        | Verified sender address (defaults to `onboarding@resend.dev`) |
+| `SITE_URL`       | Build (optional)   | Absolute origin for canonical/OG/sitemap; overrides the constant |
+
+Server-side vars are never committed and never shipped in client code — see
+`.env.example` (names only). On Vercel set them in **Project → Settings →
+Environment Variables** for Production, Preview and Development.
+
+`SITE_URL` defaults to the `SITE_URL` constant in `src/data/site.ts`
+(currently the placeholder `https://portfolio-alexander-nzaywa.vercel.app`).
+Change the constant, or set the env var at build time (which wins), when the
+site moves to a custom domain.
+
+### Deterministic installs (package-lock.json)
+
+The repo is synced to GitHub through a text-only API transport, so the
+lockfile is committed as split parts in `scripts/assets/package-lock.json.part-*`.
+Vercel's **Install Command** merges them before installing:
+
+```
+cat scripts/assets/package-lock.json.part-* > package-lock.json && npm ci
+```
+
+Locally, `npm install` once is enough.
+
+## Replacing media
+
+All media lives in `public/media/`, and **every** path is registered in
+exactly one map: `src/data/media.ts` (`MEDIA`). To swap a piece of media:
 
 1. Drop the new file into `public/media/`.
 2. Keep the same filename, or update the matching key in `src/data/media.ts`.
-3. Components resolve media only through that map — nothing references `/media/...` directly.
+3. Components resolve media only through that map — nothing references
+   `/media/...` directly.
 
-`/media/landiq-demo.mp4` and `/media/duka-demo.mp4` are referenced but intentionally absent for now: components fall back to their poster images when a video is missing. The current SVG files are dark-gradient placeholders pending real media.
+`/media/landiq-demo.mp4` and `/media/duka-demo.mp4` are referenced but
+intentionally absent for now: components fall back to their poster images
+when a video is missing. The current SVG files are dark-gradient
+placeholders pending real media.
+
+**When real photos/videos arrive**: serve hero slides as WebP/AVIF (the
+slides use CSS `background-image`, so switch to `image-set()` or `<img>`
+with `srcset` + `type="image/avif"` fallbacks) and keep poster images as
+WebP/AVIF too. The `<Video>` component already lazy-plays only in view and
+shows posters everywhere else.
+
+### Generated raster assets (og.png, apple-touch-icon.png)
+
+`public/media/og.png` (1200×630) and `public/apple-touch-icon.png` (180×180)
+are **generated at build time** by decoding the base64 text files in
+`scripts/assets/*.b64` (`npm run prebuild`). This keeps the repo text-only.
+To replace them: encode your PNG (`base64 -w0 new.png >
+scripts/assets/og.png.b64`) or drop the real file into `public/` and remove
+the matching entry from `.gitignore`.
 
 ## Structure
 
 ```
 api/                 serverless functions (Vercel) — health check at /api/health
-public/media/        images, posters, (future) videos
+public/media/        images, posters, og.png (generated), (future) videos
+scripts/
+  assets/            base64 raster assets + package-lock parts (decoded/merged at build)
+  decode-assets.mjs  prebuild: writes the PNGs into public/
+  test-contact-api.sh  curl smoke tests for /api/contact
 src/
   components/
-    layout/          Navbar, Footer, Layout, ScrollToTop
-    sections/        visual sections (added in later chunks)
-    ui/              FadeIn, PrimaryButton, GhostButton, SectionHeading
-  data/              ALL site content: site, hero, projects, timeline, services, nav, media
-  hooks/             useReducedMotion
+    layout/          Navbar (desktop dropdown + mobile sheet), Footer, Layout, ScrollToTop
+    sections/        hero, projects, timeline, contact
+    ui/              FadeIn, PrimaryButton, GhostButton, SectionHeading, Video
+  data/              ALL site content: site (incl. SITE_URL), hero, projects, timeline, services, nav, media
+  hooks/             useReducedMotion, useMediaQuery, usePageMeta
   lib/               cn
-  pages/             Home, Services, NotFound
+  pages/             Home (eager), Services + NotFound (lazy-loaded)
 ```
 
 ## Routing & deployment
 
 - Routes: `/` (Home), `/services` (Services), `*` (NotFound).
 - Hash targets scroll smoothly: `/#projects`, `/#timeline`, `/#contact`, `/services#duka-manager`, `/services#custom`, `/services#contact`.
-- `vercel.json` rewrites everything except `/api/*` to `/index.html` (SPA history fallback), so a refresh on `/services` survives.
-- Vercel deploys `main` automatically; `/api` functions run serverless.
+- `vercel.json` rewrites everything except `/api/*` to `/index.html` (SPA history fallback), so a refresh on `/services` survives. It also sets security headers (`X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`) and caching: immutable for fingerprinted `/assets/*`, 24h for unhashed `/media/*`, `/fonts/*` and icons.
+- Vercel: framework preset **Vite**, install `cat scripts/assets/package-lock.json.part-* > package-lock.json && npm ci`, build `npm run build`, output `dist`, Node 20. Deploys `main` automatically; `/api` functions run serverless.
 
 ## Conventions
 

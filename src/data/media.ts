@@ -48,6 +48,3 @@ export type MediaKey = keyof typeof MEDIA;
 export function media(key: MediaKey): string {
   return MEDIA[key];
 }
-
-/** Keys that point at video files (used by components to pick a <video> element). */
-export const VIDEO_KEYS: readonly MediaKey[] = ['landiq-demo', 'duka-demo'];

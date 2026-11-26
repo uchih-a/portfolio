@@ -3,13 +3,15 @@ import { nav } from '../../../data/nav';
 
 /**
  * Brand mark: an "AN" monogram set in a white rounded pebble.
- * Links home; there is no accompanying wordmark.
+ * Links home; there is no accompanying wordmark. The accessible name
+ * includes the visible "AN" glyphs so speech input matches
+ * (label-content-name-mismatch).
  */
 export default function Brand() {
   return (
     <Link
       to={nav.brand.href}
-      aria-label={`${nav.brand.label} — home`}
+      aria-label="AN — home"
       className="flex h-11 w-11 items-center justify-center rounded-full transition-colors duration-200 hover:bg-white/5"
     >
       <svg

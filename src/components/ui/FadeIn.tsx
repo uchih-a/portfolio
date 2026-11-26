@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { cn } from '../../lib/cn';
@@ -32,7 +32,7 @@ export default function FadeIn({
   const offset = reduced ? { x: 0, y: 0 } : { x, y };
 
   return (
-    <motion.div
+    <m.div
       className={cn(className)}
       initial={{ opacity: 0, ...offset }}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
@@ -40,6 +40,6 @@ export default function FadeIn({
       transition={{ delay, duration, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }

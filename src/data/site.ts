@@ -18,6 +18,16 @@ export interface SiteData {
   notFound: NotFoundContent;
 }
 
+/**
+ * Absolute origin used for the canonical link, Open Graph / Twitter
+ * URLs and the generated sitemap.xml + robots.txt.
+ *
+ * PLACEHOLDER — change this constant (or set the SITE_URL environment
+ * variable at build time, which wins) when the site moves to its real
+ * domain. No trailing slash.
+ */
+export const SITE_URL = 'https://portfolio-alexander-nzaywa.vercel.app';
+
 export const site: SiteData = {
   name: 'Alexander Mutsala Nzaywa',
   tagline: 'Data engineer who builds software, from pipelines to production APIs.',

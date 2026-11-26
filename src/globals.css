@@ -274,7 +274,10 @@ main {
     visibility 0s;
 }
 
-/* Respect prefers-reduced-motion: no wipes, parallax or auto-advance */
+/* Respect prefers-reduced-motion: no wipes, parallax, auto-advance,
+ * pulsing or staggered entrances — everything lands in its final
+ * state immediately (animation-delay is zeroed too, so the hero
+ * words, CTAs and rail do not appear late). */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --morph: 0.01s;
@@ -286,8 +289,10 @@ main {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
 }
