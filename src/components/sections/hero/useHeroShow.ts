@@ -191,7 +191,7 @@ export function useHeroShow(): HeroShowApi {
         const p = Math.min(1, (now - t0) / WIPE_MS);
         const t = easeInOutCubic(p);
         // Mask stops measured from the right edge: opaque to (t*135-35)%,
-        //  60% at the ramp midpoint, transparent at t*135%.
+        // 60% at the ramp midpoint, transparent at t*135%.
         const a = clamp(t * 135 - 35, 0, 100);
         const b = clamp(t * 135, 0, 100);
         const mid = (a + b) / 2;
