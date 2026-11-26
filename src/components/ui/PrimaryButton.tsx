@@ -12,6 +12,8 @@ interface PrimaryButtonProps {
   type?: 'button' | 'submit';
   onClick?: () => void;
   ariaLabel?: string;
+  /** Disables the <button> variant (links ignore it). */
+  disabled?: boolean;
 }
 
 /** Primary CTA: pill with the signature gradient, white text. */
@@ -23,11 +25,22 @@ export default function PrimaryButton({
   type = 'button',
   onClick,
   ariaLabel,
+  disabled,
 }: PrimaryButtonProps) {
   const classes = cn(
-    'inline-flex min-h-11 items-center justify-center rounded-full bg-[linear-gradient(123deg,#18011F_7%,#B600A8_37%,#7621B0_72%,#BE4C00_100%)] px-7 py-3 text-sm font-bold tracking-wide text-white transition-[filter] duration-200 hover:brightness-110',
+    'inline-flex min-h-11 items-center justify-center rounded-full bg-[linear-gradient(123deg,#18011F_7%,#B600A8_37%,#7621B0_72%,#BE4C00_100%)] px-7 py-3 text-sm font-bold tracking-wide text-white transition-[filter] duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60',
     className,
   );
+
+  if (to && to.startsWith('#')) {
+    // Same-page fragment: a native anchor re-scrolls on every click,
+    // even when the hash is already set (a router Link would not).
+    return (
+      <a href={to} className={classes} aria-label={ariaLabel}>
+        {children}
+      </a>
+    );
+  }
 
   if (to) {
     return (
@@ -52,7 +65,7 @@ export default function PrimaryButton({
   }
 
   return (
-    <button type={type} onClick={onClick} className={classes} aria-label={ariaLabel}>
+    <button type={type} onClick={onClick} className={classes} aria-label={ariaLabel} disabled={disabled}>
       {children}
     </button>
   );

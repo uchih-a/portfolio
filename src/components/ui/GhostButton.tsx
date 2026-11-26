@@ -29,6 +29,16 @@ export default function GhostButton({
     className,
   );
 
+  if (to && to.startsWith('#')) {
+    // Same-page fragment: a native anchor re-scrolls on every click,
+    // even when the hash is already set (a router Link would not).
+    return (
+      <a href={to} className={classes} aria-label={ariaLabel}>
+        {children}
+      </a>
+    );
+  }
+
   if (to) {
     return (
       <Link to={to} className={classes} aria-label={ariaLabel}>

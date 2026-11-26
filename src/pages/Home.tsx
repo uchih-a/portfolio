@@ -1,17 +1,22 @@
 import Hero from '../components/sections/hero/Hero';
+import Contact from '../components/sections/contact/Contact';
+import Projects from '../components/sections/projects/Projects';
+import Timeline from '../components/sections/timeline/Timeline';
+import { usePageMeta } from '../hooks/usePageMeta';
 
-/**
- * Home page: the cinematic hero, then placeholder sections whose
- * content lands in later chunks. ids and heights make hash
- * navigation verifiable right now.
- */
+/** Home page: the cinematic hero, selected projects, timeline, contact. */
 export default function Home() {
+  usePageMeta(
+    'Alexander Nzaywa — Data engineer & software developer',
+    'Alexander Mutsala Nzaywa — data engineer who builds software, from pipelines to production APIs. Kenya, open to remote.',
+  );
+
   return (
     <>
       <Hero />
-      <section id="projects" aria-label="Selected work" className="min-h-screen border-t border-line" />
-      <section id="timeline" aria-label="Timeline" className="min-h-screen border-t border-line" />
-      <section id="contact" aria-label="Contact" className="min-h-screen border-t border-line" />
+      <Projects />
+      <Timeline />
+      <Contact />
     </>
   );
 }

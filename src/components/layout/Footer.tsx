@@ -1,7 +1,9 @@
+import { Link, useLocation } from 'react-router-dom';
 import { site } from '../../data/site';
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { pathname } = useLocation();
 
   return (
     <footer className="border-t border-line">
@@ -12,6 +14,16 @@ export default function Footer() {
           <p className="mt-2 text-sm text-muted">{site.location}</p>
         </div>
         <ul className="flex items-center gap-1">
+          {pathname !== '/' && (
+            <li>
+              <Link
+                to="/"
+                className="flex min-h-11 items-center rounded-full px-4 text-sm font-medium text-muted transition-colors hover:text-ink"
+              >
+                Portfolio
+              </Link>
+            </li>
+          )}
           {site.social.github && (
             <li>
               <a
