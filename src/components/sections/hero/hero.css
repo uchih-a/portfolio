@@ -515,21 +515,20 @@
   color: #5c5156;
 }
 
+/* Values wrap instead of ellipsizing — no clipped text at any width. */
 .fact-value {
-  font-size: 21px;
-  line-height: 1.25;
+  font-size: 18px;
+  line-height: 1.2;
   font-weight: 500;
   color: #1d1a1c;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: break-word;
 }
 
-/* Send button: black square, white paper-plane icon. */
+/* Send button: black square, white paper-plane icon (44px touch target). */
 .facts-send {
   flex: none;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   margin-left: 8px;
   border-radius: 11px;
   background: #0c0c0c;
@@ -599,8 +598,13 @@
     gap: 10px;
   }
 
+  /* The widest fact gets a full row so its value never truncates. */
+  .fact--wide {
+    grid-column: 1 / -1;
+  }
+
   .fact-value {
-    font-size: 15.5px;
+    font-size: 15px;
   }
 
   .fact-label {
