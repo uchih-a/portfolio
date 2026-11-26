@@ -12,9 +12,20 @@ dist-ssr
 # vercel
 .vercel
 
-# package-lock is excluded from MCP-based pushes (too large for the API transport).
-# Commit it locally with `git add -f package-lock.json` if you want reproducible installs.
+# package-lock.json is synced as split text parts (scripts/assets/
+# package-lock.json.part-*) because the repo is pushed through the
+# GitHub API transport, which rejects large payloads. The Vercel
+# install command merges them before `npm ci`:
+#   cat scripts/assets/package-lock.json.part-* > package-lock.json && npm ci
+# Locally, run `npm install` once. To commit a lockfile directly:
+# `git add -f package-lock.json`.
 package-lock.json
+
+# raster assets decoded from scripts/assets/*.b64 by the prebuild step
+# (the repo is synced through a text-only API transport, so binaries
+# are committed as base64 text; see scripts/decode-assets.mjs)
+public/media/og.png
+public/apple-touch-icon.png
 
 # logs & misc
 *.local

@@ -8,9 +8,12 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:api": "vercel dev",
+    "prebuild": "node scripts/decode-assets.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:api": "bash scripts/test-contact-api.sh"
   },
   "dependencies": {
     "@fontsource-variable/urbanist": "^5.0.0",
