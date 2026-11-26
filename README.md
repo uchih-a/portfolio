@@ -26,7 +26,7 @@ Personal portfolio for **Alexander Mutsala Nzaywa** — data engineer who builds
 | `npm run dev`       | Local dev server                                                    |
 | `npm run dev:api`   | `vercel dev` — serves the SPA + `/api` functions locally            |
 | `npm run lint`      | ESLint — must pass before every commit                              |
-| `npm run build`     | Decode raster assets, type-check (`tsc -b`), build to `dist/`       |
+| `npm run build`     | Generate raster assets, type-check (`tsc -b`), build to `dist/`     |
 | `npm run preview`   | Serve the production build locally (SPA fallback included)          |
 | `npm run test:api`  | Curl smoke tests for `/api/contact` (see below)                     |
 
@@ -65,7 +65,7 @@ Run them **without** `RESEND_API_KEY` set: valid payloads then exercise the
 ### Environment variables
 
 | Name             | Scope              | Purpose                                                     |
-| ---------------- | ------------------ | ----------------------------------------------------------- |
+| ------------------ | ------------------ | ----------------------------------------------------------- |
 | `RESEND_API_KEY` | Server-only        | Resend API key used by the contact endpoint                 |
 | `CONTACT_TO`     | Server-only        | Destination email for contact-form messages                 |
 | `CONTACT_FROM`   | Server-only        | Verified sender address (defaults to `onboarding@resend.dev`) |
@@ -83,14 +83,15 @@ site moves to a custom domain.
 ### Deterministic installs (package-lock.json)
 
 The repo is synced to GitHub through a text-only API transport, so the
-lockfile is committed as split parts in `scripts/assets/package-lock.json.part-*`.
-Vercel's **Install Command** merges them before installing:
+lockfile is maintained by a workflow instead of being pushed by hand:
+`.github/workflows/lockfile.yml` resolves the dependency tree
+(`npm install --package-lock-only`), installs it (`npm ci`), verifies
+`npm run lint` + `npm run build`, then commits `package-lock.json` back
+to `main`. Vercel's **Install Command** is plain `npm ci`, which consumes
+the committed lockfile.
 
-```
-cat scripts/assets/package-lock.json.part-* > package-lock.json && npm ci
-```
-
-Locally, `npm install` once is enough.
+Locally, `npm install` once is enough (the lockfile is gitignored locally
+to keep the transport small).
 
 ## Replacing media
 
@@ -116,11 +117,11 @@ shows posters everywhere else.
 ### Generated raster assets (og.png, apple-touch-icon.png)
 
 `public/media/og.png` (1200×630) and `public/apple-touch-icon.png` (180×180)
-are **generated at build time** by decoding the base64 text files in
-`scripts/assets/*.b64` (`npm run prebuild`). This keeps the repo text-only.
-To replace them: encode your PNG (`base64 -w0 new.png >
-scripts/assets/og.png.b64`) or drop the real file into `public/` and remove
-the matching entry from `.gitignore`.
+are **generated at build time** by `scripts/decode-assets.mjs`
+(`npm run prebuild`) — a pure-Node PNG writer (zlib + a 5×7 bitmap font),
+so the repo carries no binary files. To replace them with real designs:
+drop the real files into `public/` and remove the matching entries from
+`.gitignore` — the generator never overwrites existing files.
 
 ## Structure
 
@@ -128,9 +129,9 @@ the matching entry from `.gitignore`.
 api/                 serverless functions (Vercel) — health check at /api/health
 public/media/        images, posters, og.png (generated), (future) videos
 scripts/
-  assets/            base64 raster assets + package-lock parts (decoded/merged at build)
-  decode-assets.mjs  prebuild: writes the PNGs into public/
+  decode-assets.mjs  prebuild: renders the og.png / apple-touch-icon.png placeholders (pure Node)
   test-contact-api.sh  curl smoke tests for /api/contact
+.github/workflows/   lockfile.yml — resolves, verifies and commits package-lock.json
 src/
   components/
     layout/          Navbar (desktop dropdown + mobile sheet), Footer, Layout, ScrollToTop
@@ -147,7 +148,7 @@ src/
 - Routes: `/` (Home), `/services` (Services), `*` (NotFound).
 - Hash targets scroll smoothly: `/#projects`, `/#timeline`, `/#contact`, `/services#duka-manager`, `/services#custom`, `/services#contact`.
 - `vercel.json` rewrites everything except `/api/*` to `/index.html` (SPA history fallback), so a refresh on `/services` survives. It also sets security headers (`X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`) and caching: immutable for fingerprinted `/assets/*`, 24h for unhashed `/media/*`, `/fonts/*` and icons.
-- Vercel: framework preset **Vite**, install `cat scripts/assets/package-lock.json.part-* > package-lock.json && npm ci`, build `npm run build`, output `dist`, Node 20. Deploys `main` automatically; `/api` functions run serverless.
+- Vercel: framework preset **Vite**, install `npm ci` (lockfile committed by the lockfile workflow), build `npm run build`, output `dist`, Node 20. Deploys `main` automatically; `/api` functions run serverless.
 
 ## Conventions
 
