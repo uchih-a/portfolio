@@ -23,6 +23,13 @@ package-lock.json
 public/media/og.png
 public/apple-touch-icon.png
 
+# rail icon rasters decoded from committed .b64 sidecars by the same
+# prebuild step (public/media/rail-<n>-icon.png.b64 carries the bytes —
+# the transport is text-only). Replace a sidecar's content to update.
+public/media/rail-1-icon.png
+public/media/rail-2-icon.png
+public/media/rail-3-icon.png
+
 # logs & misc
 *.local
 logs
