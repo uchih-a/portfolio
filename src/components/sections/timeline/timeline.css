@@ -1,11 +1,12 @@
 /* ================================================================
- * Timeline: a vertical accent line that draws itself as the section
- * scrolls (scaleY driven by Framer useScroll), with a dot on the
- * line for every entry that fills with the accent colour once the
- * drawn line reaches it. Entries alternate sides at >= 768px; on
- * small screens the line hugs the left edge and the entries sit on
- * the right. The last entry is the current milestone: its dot wears
- * a soft pulsing ring (removed under prefers-reduced-motion).
+ * Timeline: simple, single column at every size. A vertical accent
+ * line on the left draws itself as the section scrolls (scaleY
+ * driven by Framer useScroll), with a dot on the line for every
+ * entry that fills with the accent colour once the drawn line
+ * reaches it. Cards carry a small type icon and a subtle per-type
+ * background/border tint (six muted tints over the existing panel
+ * and line tokens). The 'now' entry's dot wears a soft pulsing
+ * ring (removed under prefers-reduced-motion).
  * ================================================================ */
 
 .tl-list {
@@ -25,13 +26,6 @@
   will-change: transform;
 }
 
-@media (min-width: 768px) {
-  .tl-line {
-    left: 50%;
-    margin-left: -1px;
-  }
-}
-
 /* Entry dot: 14px, centred on the line. */
 .tl-dot {
   position: absolute;
@@ -39,13 +33,6 @@
   left: 6px;
   width: 14px;
   height: 14px;
-}
-
-@media (min-width: 768px) {
-  .tl-dot {
-    left: 50%;
-    transform: translateX(-50%);
-  }
 }
 
 .tl-dot-mark {
@@ -67,7 +54,7 @@
   transform-origin: 50% 50%;
 }
 
-/* Soft pulsing ring on the current-milestone dot. */
+/* Soft pulsing ring on the 'now' entry's dot. */
 .tl-dot-pulse {
   position: absolute;
   inset: -2px;
@@ -89,6 +76,121 @@
   }
 }
 
+/* ------------------------------------------------------------------
+ * Entry cards: panel base with a muted per-type tint (background
+ * gradient + border). Tints stay quiet and sit on the existing
+ * --panel / --line tokens; the 'now' card leans on the accent.
+ * ------------------------------------------------------------------ */
+
+.tl-card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 20px;
+  padding: 20px 22px 22px;
+}
+
+.tl-item[data-type='education'] .tl-card {
+  border-color: rgba(91, 141, 239, 0.26);
+  background: linear-gradient(180deg, rgba(91, 141, 239, 0.08), rgba(91, 141, 239, 0.02)),
+    var(--panel);
+}
+
+.tl-item[data-type='experience'] .tl-card {
+  border-color: rgba(74, 222, 128, 0.24);
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0.07), rgba(74, 222, 128, 0.02)),
+    var(--panel);
+}
+
+.tl-item[data-type='achievement'] .tl-card {
+  border-color: rgba(234, 197, 79, 0.26);
+  background: linear-gradient(180deg, rgba(234, 197, 79, 0.08), rgba(234, 197, 79, 0.02)),
+    var(--panel);
+}
+
+.tl-item[data-type='venture'] .tl-card {
+  border-color: rgba(45, 212, 191, 0.24);
+  background: linear-gradient(180deg, rgba(45, 212, 191, 0.07), rgba(45, 212, 191, 0.02)),
+    var(--panel);
+}
+
+.tl-item[data-type='milestone'] .tl-card {
+  border-color: rgba(167, 139, 250, 0.26);
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.08), rgba(167, 139, 250, 0.02)),
+    var(--panel);
+}
+
+.tl-item[data-type='now'] .tl-card {
+  border-color: rgba(243, 148, 25, 0.4);
+  background: linear-gradient(180deg, rgba(243, 148, 25, 0.12), rgba(243, 148, 25, 0.03)),
+    var(--panel);
+}
+
+/* Period pill. */
+.tl-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(243, 148, 25, 0.4);
+  background: rgba(243, 148, 25, 0.1);
+  padding: 4px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #f39419;
+  white-space: nowrap;
+}
+
+/* Small type icon in a tinted chip. */
+.tl-typeicon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(215, 226, 234, 0.75);
+}
+
+.tl-item[data-type='education'] .tl-typeicon {
+  border-color: rgba(91, 141, 239, 0.34);
+  background: rgba(91, 141, 239, 0.1);
+  color: rgba(148, 178, 250, 0.95);
+}
+
+.tl-item[data-type='experience'] .tl-typeicon {
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.09);
+  color: rgba(134, 239, 172, 0.95);
+}
+
+.tl-item[data-type='achievement'] .tl-typeicon {
+  border-color: rgba(234, 197, 79, 0.34);
+  background: rgba(234, 197, 79, 0.1);
+  color: rgba(241, 216, 132, 0.95);
+}
+
+.tl-item[data-type='venture'] .tl-typeicon {
+  border-color: rgba(45, 212, 191, 0.3);
+  background: rgba(45, 212, 191, 0.09);
+  color: rgba(153, 246, 228, 0.95);
+}
+
+.tl-item[data-type='milestone'] .tl-typeicon {
+  border-color: rgba(167, 139, 250, 0.34);
+  background: rgba(167, 139, 250, 0.1);
+  color: rgba(196, 181, 253, 0.95);
+}
+
+.tl-item[data-type='now'] .tl-typeicon {
+  border-color: rgba(243, 148, 25, 0.42);
+  background: rgba(243, 148, 25, 0.12);
+  color: rgba(244, 168, 71, 1);
+}
+
+/* No pulsing under reduced motion. */
 @media (prefers-reduced-motion: reduce) {
   .tl-dot-pulse {
     display: none;

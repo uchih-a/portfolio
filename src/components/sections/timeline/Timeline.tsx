@@ -1,33 +1,46 @@
 import { useLayoutEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { m, useScroll, useTransform } from 'framer-motion';
 import type { MotionValue } from 'framer-motion';
-import { certifications, timeline } from '../../../data/timeline';
+import { Activity, Briefcase, Flag, GraduationCap, Store, Trophy } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { timeline } from '../../../data/timeline';
 import type { TimelineEntry } from '../../../data/timeline';
-import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { useReducedMotion } from '../../../hooks/useReducedMotion';
-import { cn } from '../../../lib/cn';
 import FadeIn from '../../ui/FadeIn';
+import GhostButton from '../../ui/GhostButton';
 import SectionHeading from '../../ui/SectionHeading';
 import './timeline.css';
 
 /** Each dot sits at this fraction of the list height until measured. */
 const UNMEASURED_FRACTION = (i: number, total: number) => (i + 0.5) / total;
 
+/** Small icon per entry type (tinted chip next to the period pill). */
+const TYPE_ICON: Record<TimelineEntry['type'], LucideIcon> = {
+  education: GraduationCap,
+  experience: Briefcase,
+  achievement: Trophy,
+  venture: Store,
+  milestone: Flag,
+  now: Activity,
+};
+
 /**
- * Timeline section: a vertical accent line that draws itself with the
- * scroll (scaleY 0 -> 1, origin top, #F39419 -> transparent gradient).
- * Each of the five entries has a dot on the line that fills with the
- * accent colour once the drawn line reaches it (measured positions, so
- * uneven entry heights are exact). Entries alternate left/right at
- * >= 768px in bordered panels (bg panel, 1px line border, 20px radius)
- * and stack on the right of the left-edge line below that. The last
- * entry (BSc, current milestone) has a soft pulsing ring on its dot.
- * Under prefers-reduced-motion the line renders fully drawn, every dot
- * is filled and nothing is revealed — content is simply there.
+ * Timeline section, simple and single-column at every size: a vertical
+ * accent line on the left draws itself with the scroll (scaleY 0 -> 1,
+ * origin top, accent -> transparent), and each entry's dot on the line
+ * fills with the accent colour once the drawn line reaches its measured
+ * position (exact even with uneven entry heights). Every entry is one
+ * card — period pill, title, org/location, summary, achievement badges,
+ * a compact parts list for MTRH — with a small type icon and a subtle
+ * per-type background/border tint. The 'now' entry's dot wears a soft
+ * pulsing ring. Under prefers-reduced-motion the line renders fully
+ * drawn, every dot is filled and nothing animates. Below the list: a
+ * GhostButton to /journey and a quiet references line. Referee names
+ * and contact details are never rendered here.
  */
 export default function Timeline() {
   const reduced = useReducedMotion();
-  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const sectionRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
@@ -63,8 +76,6 @@ export default function Timeline() {
     };
   }, []);
 
-  const lineScaleY = reduced ? 1 : scrollYProgress;
-
   return (
     <section
       id="timeline"
@@ -76,56 +87,39 @@ export default function Timeline() {
         <SectionHeading title="Timeline" className="text-center" />
       </FadeIn>
 
-      <div className="mx-auto mt-12 max-w-5xl sm:mt-16 md:mt-20">
+      <div className="mx-auto mt-12 max-w-2xl sm:mt-16 md:mt-20">
         <div className="tl-list">
           <m.div
             aria-hidden="true"
             className="tl-line"
-            style={{ scaleY: lineScaleY }}
+            style={{ scaleY: reduced ? 1 : scrollYProgress }}
           />
           <ol ref={listRef} aria-label="Career and study timeline">
-            {timeline.map((entry, i) => {
-              const isLast = i === timeline.length - 1;
-              const sideLeft = i % 2 === 0;
-              return (
-                <li
-                  key={entry.id}
-                  className="relative pb-10 last:pb-12 md:grid md:grid-cols-2 md:gap-x-10 md:pb-14"
-                >
-                  <Dot
-                    progress={scrollYProgress}
-                    fraction={fractions[i] ?? UNMEASURED_FRACTION(i, timeline.length)}
-                    current={isLast}
-                    reduced={reduced}
-                  />
-                  <div
-                    className={cn(
-                      'pl-10 md:pl-0',
-                      sideLeft ? 'md:col-start-1 md:justify-self-end' : 'md:col-start-2',
-                    )}
-                  >
-                    <EntryPanel entry={entry} reveal={reduced ? 'none' : isDesktop ? (sideLeft ? 'left' : 'right') : 'up'} />
-                  </div>
-                </li>
-              );
-            })}
+            {timeline.map((entry, i) => (
+              <li
+                key={entry.id}
+                data-type={entry.type}
+                className="tl-item relative pb-10 pl-9 last:pb-2"
+              >
+                <Dot
+                  progress={scrollYProgress}
+                  fraction={fractions[i] ?? UNMEASURED_FRACTION(i, timeline.length)}
+                  current={entry.type === 'now'}
+                  reduced={reduced}
+                />
+                <FadeIn y={24}>
+                  <EntryCard entry={entry} />
+                </FadeIn>
+              </li>
+            ))}
           </ol>
         </div>
 
-        <FadeIn y={24} className="pl-10 md:pl-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted">
-            Certifications
-          </p>
-          <ul className="mt-4 flex flex-wrap gap-2.5">
-            {certifications.map((cert) => (
-              <li
-                key={cert}
-                className="rounded-full border border-line px-4 py-2 text-xs font-medium text-muted"
-              >
-                {cert}
-              </li>
-            ))}
-          </ul>
+        <FadeIn y={24} className="pl-9">
+          <div className="mt-4 flex flex-col items-start gap-4">
+            <GhostButton to="/journey">Walk my journey →</GhostButton>
+            <p className="text-xs text-muted">References available on request.</p>
+          </div>
         </FadeIn>
       </div>
     </section>
@@ -134,7 +128,7 @@ export default function Timeline() {
 
 /**
  * One dot on the line. The accent fill scales in when the drawn line
- * reaches the dot (fraction of list height); the current milestone
+ * reaches the dot (fraction of list height); the 'now' entry
  * additionally wears a soft pulsing ring (never under reduced motion).
  */
 function Dot({
@@ -153,45 +147,76 @@ function Dot({
   return (
     <span className="tl-dot" aria-hidden="true">
       <span className="tl-dot-mark">
-        <m.span
-          className="tl-dot-fill"
-          style={{ scale: reduced ? 1 : fill }}
-        />
+        <m.span className="tl-dot-fill" style={{ scale: reduced ? 1 : fill }} />
       </span>
       {current && !reduced && <span className="tl-dot-pulse" />}
     </span>
   );
 }
 
-/** Panel with date pill, title, org and description. */
-function EntryPanel({
-  entry,
-  reveal,
-}: {
-  entry: TimelineEntry;
-  reveal: 'none' | 'left' | 'right' | 'up';
-}) {
-  const panel = (
-    <div className="w-full max-w-md rounded-[20px] border border-line bg-panel p-5 md:p-6">
-      <p className="inline-flex items-center rounded-full border border-accent/40 bg-accent/10 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-accent">
-        {entry.period}
-      </p>
-      <h3 className="mt-3 text-lg font-bold sm:text-xl">{entry.title}</h3>
-      {entry.org && <p className="mt-1 text-sm text-muted">{entry.org}</p>}
-      {entry.description && (
-        <p className="mt-3 text-sm leading-relaxed text-muted">{entry.description}</p>
-      )}
-    </div>
-  );
-
-  if (reveal === 'none') return panel;
-
-  const x = reveal === 'left' ? -40 : reveal === 'right' ? 40 : 0;
-  const y = reveal === 'up' ? 24 : 0;
+/** One entry: single-column card with type icon, tint, content and link. */
+function EntryCard({ entry }: { entry: TimelineEntry }) {
+  const Icon = TYPE_ICON[entry.type];
 
   return (
-    <FadeIn x={x} y={y} duration={0.7}>
-      {panel}
-    </FadeIn>
+    <article className="tl-card">
+      <div className="flex flex-wrap items-center gap-2.5">
+        <span className="tl-typeicon" aria-hidden="true">
+          <Icon size={14} strokeWidth={1.8} />
+        </span>
+        <span className="tl-pill">{entry.period}</span>
+      </div>
+
+      <h3 className="mt-3 text-lg font-bold sm:text-xl">{entry.title}</h3>
+      {entry.org && <p className="mt-1 text-sm text-muted">{entry.org}</p>}
+      {entry.location && <p className="mt-0.5 text-sm text-muted">{entry.location}</p>}
+      {entry.summary && <p className="mt-3 text-sm leading-relaxed text-muted">{entry.summary}</p>}
+
+      {entry.achievements && (
+        <ul className="mt-3 flex flex-wrap gap-2">
+          {entry.achievements.map((achievement) => (
+            <li
+              key={achievement}
+              className="rounded-full border border-line bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted"
+            >
+              {achievement}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {entry.parts && (
+        <ul className="mt-3 space-y-1.5">
+          {entry.parts.map((part) => (
+            <li key={part.title} className="text-sm leading-relaxed">
+              <span className="font-semibold">{part.title}</span>
+              <span className="text-muted"> — {part.detail}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {entry.link && <EntryLink label={entry.link.label} href={entry.link.href} />}
+    </article>
+  );
+}
+
+/** Entry link: internal paths use the router, anything else a plain anchor. */
+function EntryLink({ label, href }: { label: string; href: string }) {
+  const classes =
+    'mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent transition-colors hover:text-ink';
+
+  if (href.startsWith('/')) {
+    return (
+      <Link to={href} className={classes}>
+        {label}
+      </Link>
+    );
+  }
+
+  return (
+    <a href={href} target="_blank" rel="noreferrer noopener" className={classes}>
+      {label}
+    </a>
   );
 }

@@ -8,6 +8,7 @@ import Home from './pages/Home';
 /* Route-level code splitting: the landing page stays eager (best LCP);
  * the other routes load on demand. */
 const Services = lazy(() => import('./pages/Services'));
+const Journey = lazy(() => import('./pages/Journey'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 /** Shown while a lazily-loaded route chunk arrives. */
@@ -40,6 +41,7 @@ function AnimatedRoutes() {
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
               <Route path="/services" element={<Services />} />
+              <Route path="/journey" element={<Journey />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
