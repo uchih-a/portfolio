@@ -1,57 +1,114 @@
 export interface TimelineEntry {
   id: string;
-  /** Human-readable period, e.g. "2025-05 – 2025-08" or "2026". */
+  type: 'education' | 'experience' | 'achievement' | 'venture' | 'milestone' | 'now';
+  startYear: number;
   period: string;
   title: string;
   org?: string;
-  description: string;
+  location?: string;
+  summary: string;
+  achievements?: string[];
+  parts?: { title: string; detail: string }[];
+  link?: { label: string; href: string } | null;
+  todo?: string;
 }
 
 /**
- * Oldest first.
- * landiq and EDW periods verified against commit history via the GitHub MCP
- * (landiq: first commit 2026-04, latest 2026-11; EDW: first commit 2026-10-18, latest 2026-11-01).
+ * Chronological, ascending (oldest first). One entry per stage of the
+ * story; the /journey scroll-story retells these by id, so ids are stable.
+ *
+ * NOTE: `todo` fields are unresolved (surfaced, never fixed here).
  */
 export const timeline: TimelineEntry[] = [
   {
-    id: 'ampath-attachment',
-    period: '2025-05 – 2025-08',
-    title: 'Monitoring & Evaluation Attachee',
-    org: 'USAID AMPATH Uzima (Moi Teaching & Referral Hospital), Eldoret',
-    description:
-      'Validated programme data in DHIS2 against Ministry of Health indicators and built dashboards in DHIS2, Power BI, Excel and R Shiny.',
+    id: 'school',
+    type: 'education',
+    startYear: 2018,
+    period: '2018 – 2022',
+    title: "St. Mary's Kibabii School",
+    org: 'National school, Bungoma',
+    summary: 'Four years at a national school, starting in Form 1 in 2018.',
+    achievements: ['Dorm prefect'],
   },
+
   {
-    id: 'landiq',
-    period: '2026-04 – 2026-11',
-    title: 'Property24 scraper and LandIQ',
-    description: 'Built a resumable Scrapy pipeline, then the LandIQ valuation platform.',
-  },
-  {
-    id: 'enterprise-data-warehouse',
-    period: '2026-10 – 2026-11',
-    title: 'Enterprise Data Warehouse',
-    description:
-      'Designed a Medallion-architecture warehouse in SQL Server with ETL, quality tests and a data catalog.',
-  },
-  {
-    id: 'duka-live',
-    period: '2026-08',
-    title: 'Duka Manager goes live',
-    description: 'Finance, sales and stock tracking web app for small shops, used by 3 businesses.',
-  },
-  {
-    id: 'bsc-data-science',
-    period: '2026',
+    id: 'university',
+    type: 'education',
+    startYear: 2022,
+    period: '2022 – Oct 2026',
     title: 'BSc Data Science',
     org: 'Meru University of Science and Technology',
-    description: '',
+    summary: 'Four years studying data science, from machine learning to data warehousing.',
   },
-];
 
-/** Certification chips shown with the timeline (no issuers). */
-export const certifications: string[] = [
-  'Cisco Python course',
-  'National HIV Program DHIS2',
-  'Data Quality Assessment',
+  {
+    id: 'traffic-contest',
+    type: 'achievement',
+    startYear: 2024,
+    period: '2024',
+    title: 'Won a university contest',
+    summary:
+      'Built a traffic analysis system that predicts how severe a traffic jam will be, and won the contest.',
+    link: null,
+    todo: 'verify year (currently 2024); add repo URL to link if/when available',
+  },
+
+  {
+    id: 'ampath',
+    type: 'experience',
+    startYear: 2025,
+    period: 'May – Aug 2025',
+    title: 'M&E Attachee, USAID AMPATH Uzima',
+    org: 'Moi Teaching & Referral Hospital',
+    location: 'Eldoret',
+    summary:
+      'Validated programme data in DHIS2 against Ministry of Health indicators and built dashboards in DHIS2, Power BI, Excel and R Shiny.',
+  },
+
+  {
+    id: 'mtrh',
+    type: 'experience',
+    startYear: 2026,
+    period: 'May – Sep 2026',
+    title: 'Attachment, Moi Teaching & Referral Hospital',
+    location: 'Eldoret',
+    summary: 'Rotated through three departments and spent most of my time with the programmers.',
+    parts: [
+      { title: 'Cancer Registry', detail: 'Data entry' },
+      { title: 'Research & Statistics', detail: 'Working with research data and statistics' },
+      {
+        title: 'Programmers Department',
+        detail: 'Built scripts that automate reports and other system functions',
+      },
+    ],
+  },
+
+  {
+    id: 'duka',
+    type: 'venture',
+    startYear: 2026,
+    period: 'Aug 2026 – now',
+    title: 'Duka Manager',
+    summary: 'Finance, sales and stock tracking for small shops, used by 3 businesses.',
+    link: { label: 'See services', href: '/services#duka-manager' },
+  },
+
+  {
+    id: 'degree-complete',
+    type: 'milestone',
+    startYear: 2026,
+    period: '23 Oct 2026',
+    title: 'Completed my degree',
+    summary: '',
+  },
+
+  {
+    id: 'now',
+    type: 'now',
+    startYear: 2026,
+    period: 'Now',
+    title: 'Open to work',
+    summary: 'Looking for data engineering and software roles, remote or on-site.',
+    link: { label: 'Get in touch', href: '/#contact' },
+  },
 ];

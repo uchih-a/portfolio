@@ -31,7 +31,7 @@ export const SITE_URL = 'https://portfolio-alexander-nzaywa.vercel.app';
 export const site: SiteData = {
   name: 'Alexander Mutsala Nzaywa',
   tagline: 'Data engineer who builds software, from pipelines to production APIs.',
-  location: 'Kenya (remote)',
+  location: 'Kenya · Remote or on-site',
   social: {
     github: 'https://github.com/uchih-a',
     linkedin: null,
